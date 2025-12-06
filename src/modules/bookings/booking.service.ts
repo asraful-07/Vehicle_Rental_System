@@ -5,7 +5,7 @@ export const BookingVehiclesService = async (payload: Record<string, any>) => {
 
   // 1. Check if vehicle exists and get daily price
   const vehicleResult = await pool.query(
-    `SELECT daily_rent_price, availability_status FROM vehicles WHERE id = $1`,
+    `SELECT * FROM vehicles WHERE id = $1`,
     [vehicle_id]
   );
 
@@ -63,13 +63,56 @@ export const BookingVehiclesService = async (payload: Record<string, any>) => {
     );
   }
 
-  return bookingResult.rows[0];
+  const booking = bookingResult.rows[0];
+
+  // 6. Add vehicle info to response
+  const vehicleInfo = {
+    vehicle_name: vehicle.vehicle_name,
+    daily_rent_price: vehicle.daily_rent_price,
+  };
+
+  return {
+    ...booking,
+    vehicle: vehicleInfo,
+  };
 };
 
-// Optional: Get all bookings
-const GetBookingsService = async () => {
+// Service for all bookings (Admin)
+export const GetsBookingsService = async () => {
+  const result = await pool.query(`
+    SELECT b.*, 
+           json_build_object(
+             'name', u.name,
+             'email', u.email
+           ) AS customer,
+           json_build_object(
+             'vehicle_name', v.vehicle_name,
+             'registration_number', v.registration_number
+           ) AS vehicle
+    FROM bookings b
+    JOIN users u ON b.customer_id = u.id
+    JOIN vehicles v ON b.vehicle_id = v.id
+    ORDER BY b.rent_start_date DESC
+  `);
+  return result.rows;
+};
+
+//! Service for customer's bookings
+export const GetsCustomerBookingsService = async (customer_id: number) => {
   const result = await pool.query(
-    `SELECT * FROM bookings ORDER BY rent_start_date DESC`
+    `
+    SELECT b.*,
+           json_build_object(
+             'vehicle_name', v.vehicle_name,
+             'registration_number', v.registration_number,
+             'type', v.type
+           ) AS vehicle
+    FROM bookings b
+    JOIN vehicles v ON b.vehicle_id = v.id
+    WHERE b.customer_id = $1
+    ORDER BY b.rent_start_date DESC
+  `,
+    [customer_id]
   );
   return result.rows;
 };
