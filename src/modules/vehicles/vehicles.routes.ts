@@ -10,10 +10,10 @@ import auth from "../../middleware/auth";
 
 const router = express.Router();
 
-router.post("/v1/vehicles", CreateVehiclesController);
-router.get("/v1/vehicles", auth("admin"), GetsVehiclesController);
-router.get("/v1/vehicles/:vehicleId", GetVehiclesController);
-router.put("/v1/vehicles/:vehicleId", UpdateVehiclesController);
-router.delete("/v1/vehicles/:vehicleId", DeleteVehiclesController);
+router.post("/vehicles", auth("admin"), CreateVehiclesController);
+router.get("/vehicles", GetsVehiclesController);
+router.get("/vehicles/:vehicleId", GetVehiclesController);
+router.put("/vehicles/:vehicleId", auth("admin"), UpdateVehiclesController);
+router.delete("/vehicles/:vehicleId", auth("admin"), DeleteVehiclesController);
 
 export default router;
