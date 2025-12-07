@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import {
+  autoReturnExpiredBookings,
   BookingVehiclesService,
   GetsBookingsService,
   GetsCustomerBookingsService,
+  UpdateBookingService,
 } from "./booking.service";
 
 export const BookVeController = async (req: Request, res: Response) => {
@@ -37,6 +39,8 @@ export const BookVeController = async (req: Request, res: Response) => {
 
 export const GetsBookingsHandler = async (req: Request, res: Response) => {
   try {
+    await autoReturnExpiredBookings();
+
     if (!req.user) {
       return res.status(401).json({ success: false, message: "Unauthorized" });
     }
@@ -62,5 +66,40 @@ export const GetsBookingsHandler = async (req: Request, res: Response) => {
     }
   } catch (err: any) {
     return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const UpdateController = async (req: Request, res: Response) => {
+  try {
+    const booking_id = Number(req.params.bookingId);
+    const user = req.user as any;
+    const { status } = req.body;
+
+    if (!booking_id || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking ID and status are required",
+      });
+    }
+
+    const result = await UpdateBookingService({
+      booking_id,
+      status,
+      user,
+    });
+
+    res.status(200).json({
+      success: true,
+      message:
+        status === "cancelled"
+          ? "Booking cancelled successfully"
+          : "Booking marked as returned. Vehicle is now available",
+      data: result,
+    });
+  } catch (error: any) {
+    res.status(403).json({
+      success: false,
+      message: error.message,
+    });
   }
 };
