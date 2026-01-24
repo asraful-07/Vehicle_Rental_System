@@ -65,16 +65,7 @@ cd project-folder-name
 
 ```bash
 npm install
-```
 
-### 4. Setup Environment Variables
-
-Create a `.env` file in the root directory and add:
-
-```
-PORT=5001
-DB_URL=postgresql://neondb_owner:npg_hrv5MLxQzOR1@ep-silent-bird-a8sf1uj1-pooler.eastus2.azure.neon.tech/neondb?sslmode=require&channel_binding=require
-JWT_SECRET_KEY= "KMUFsIDTnFmyG3nMiGM6H9FNFUROf3wh7SmqJp-QV30"
 ```
 
 ### 5. Run the project
