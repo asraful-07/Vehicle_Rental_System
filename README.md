@@ -79,5 +79,3 @@ Server will start at:
 ```
 http://localhost:5001
 ```
-
----
